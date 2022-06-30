@@ -53,7 +53,7 @@ def main(_):
 
   if FLAGS.save_path is not None:
     if os.path.exists(FLAGS.save_path):
-      raise ValueError("Folder {} already exists".format(FLAGS.save_path))
+      raise ValueError(f"Folder {FLAGS.save_path} already exists")
     else:
       os.mkdir(FLAGS.save_path)
 
@@ -85,8 +85,7 @@ def main(_):
 
       # Logging.
       if (e + 1) % FLAGS.log_period == 0:
-        util.print_stats("Epoch {}".format(e + 1), total_cost, total_time,
-                         FLAGS.log_period)
+        util.print_stats(f"Epoch {e + 1}", total_cost, total_time, FLAGS.log_period)
         total_time = 0
         total_cost = 0
 
@@ -107,7 +106,7 @@ def main(_):
           print("Removing previously saved meta-optimizer")
           for f in os.listdir(FLAGS.save_path):
             os.remove(os.path.join(FLAGS.save_path, f))
-          print("Saving meta-optimizer to {}".format(FLAGS.save_path))
+          print(f"Saving meta-optimizer to {FLAGS.save_path}")
           optimizer.save(sess, FLAGS.save_path)
           best_evaluation = eval_cost
 

@@ -70,7 +70,7 @@ def main(_):
     meta_loss = optimizer.meta_loss(problem, 1, net_assignments=net_assignments)
     _, update, reset, cost_op, _ = meta_loss
   else:
-    raise ValueError("{} is not a valid optimizer".format(FLAGS.optimizer))
+    raise ValueError(f"{FLAGS.optimizer} is not a valid optimizer")
 
   with ms.MonitoredSession() as sess:
     # Prevent accidental changes to the graph.
@@ -86,8 +86,8 @@ def main(_):
       total_cost += cost
 
     # Results.
-    util.print_stats("Epoch {}".format(FLAGS.num_epochs), total_cost,
-                     total_time, FLAGS.num_epochs)
+    util.print_stats(f"Epoch {FLAGS.num_epochs}", total_cost, total_time,
+                     FLAGS.num_epochs)
 
 
 if __name__ == "__main__":
