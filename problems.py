@@ -55,10 +55,8 @@ def simple_multi_optimizer(num_dims=2):
   """Multidimensional simple problem."""
 
   def get_coordinate(i):
-    return tf.get_variable("x_{}".format(i),
-                           shape=[],
-                           dtype=tf.float32,
-                           initializer=tf.ones_initializer())
+    return tf.get_variable(
+        f"x_{i}", shape=[], dtype=tf.float32, initializer=tf.ones_initializer())
 
   def build():
     coordinates = [get_coordinate(i) for i in xrange(num_dims)]
@@ -122,7 +120,7 @@ def ensemble(problems, weights=None):
   def build():
     loss = 0
     for i, build_fn in enumerate(build_fns):
-      with tf.variable_scope("problem_{}".format(i)):
+      with tf.variable_scope(f"problem_{i}"):
         loss_p = build_fn()
         if weights:
           loss_p *= weights[i]
@@ -185,11 +183,11 @@ def _maybe_download_cifar10(path):
     os.makedirs(path)
   filepath = os.path.join(path, CIFAR10_FILE)
   if not os.path.exists(filepath):
-    print("Downloading CIFAR10 dataset to {}".format(filepath))
+    print(f"Downloading CIFAR10 dataset to {filepath}")
     url = os.path.join(CIFAR10_URL, CIFAR10_FILE)
     filepath, _ = urllib.request.urlretrieve(url, filepath)
     statinfo = os.stat(filepath)
-    print("Successfully downloaded {} bytes".format(statinfo.st_size))
+    print(f"Successfully downloaded {statinfo.st_size} bytes")
     tarfile.open(filepath, "r:gz").extractall(path)
 
 

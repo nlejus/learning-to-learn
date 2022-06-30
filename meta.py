@@ -46,15 +46,14 @@ def _nested_assign(ref, value):
   Raises:
     ValueError: If `ref` and `values` have different structures.
   """
-  if isinstance(ref, list) or isinstance(ref, tuple):
-    if len(ref) != len(value):
-      raise ValueError("ref and value have different lengths.")
-    result = [_nested_assign(r, v) for r, v in zip(ref, value)]
-    if isinstance(ref, tuple):
-      return tuple(result)
-    return result
-  else:
+  if not isinstance(ref, (list, tuple)):
     return tf.assign(ref, value)
+  if len(ref) != len(value):
+    raise ValueError("ref and value have different lengths.")
+  result = [_nested_assign(r, v) for r, v in zip(ref, value)]
+  if isinstance(ref, tuple):
+    return tuple(result)
+  return result
 
 
 def _nested_variable(init, name=None, trainable=False):
@@ -68,13 +67,12 @@ def _nested_variable(init, name=None, trainable=False):
   Returns:
     Nested collection (same structure as `init`) of TensorFlow variables.
   """
-  if isinstance(init, list) or isinstance(init, tuple):
-    result = [_nested_variable(i, name, trainable) for i in init]
-    if isinstance(init, tuple):
-      return tuple(result)
-    return result
-  else:
+  if not isinstance(init, (list, tuple)):
     return tf.Variable(init, name=name, trainable=trainable)
+  result = [_nested_variable(i, name, trainable) for i in init]
+  if isinstance(init, tuple):
+    return tuple(result)
+  return result
 
 
 def _wrap_variable_creation(func, custom_getter):
@@ -140,9 +138,8 @@ def _make_with_custom_variables(func, variables):
   def custom_getter(getter, name, **kwargs):
     if kwargs["trainable"]:
       return variables.popleft()
-    else:
-      kwargs["reuse"] = True
-      return getter(name, **kwargs)
+    kwargs["reuse"] = True
+    return getter(name, **kwargs)
 
   return _wrap_variable_creation(func, custom_getter)
 
@@ -173,8 +170,7 @@ def _make_nets(variables, config, net_assignments):
   """
   # create a dictionary which maps a variable name to its index within the
   # list of variables.
-  name_to_index = dict((v.name.split(":")[0], i)
-                       for i, v in enumerate(variables))
+  name_to_index = {v.name.split(":")[0]: i for i, v in enumerate(variables)}
 
   if net_assignments is None:
     if len(config) != 1:
@@ -201,7 +197,7 @@ def _make_nets(variables, config, net_assignments):
         subset = [name_to_index[name] for name in names]
         keys.append(key)
         subsets.append(subset)
-        print("Net: {}, Subset: {}".format(key, subset))
+        print(f"Net: {key}, Subset: {subset}")
 
   # subsets should be a list of disjoint subsets (as lists!) of the variables
   # and nets should be a list of networks to apply to each subset.
@@ -229,20 +225,19 @@ class MetaOptimizer(object):
     """
     self._nets = None
 
-    if not kwargs:
-      # Use a default coordinatewise network if nothing is given. this allows
-      # for no network spec and no assignments.
-      self._config = {
-          "coordinatewise": {
-              "net": "CoordinateWiseDeepLSTM",
-              "net_options": {
-                  "layers": (20, 20),
-                  "preprocess_name": "LogAndSign",
-                  "preprocess_options": {"k": 5},
-                  "scale": 0.01,
-              }}}
-    else:
-      self._config = kwargs
+    self._config = kwargs or {
+        "coordinatewise": {
+            "net": "CoordinateWiseDeepLSTM",
+            "net_options": {
+                "layers": (20, 20),
+                "preprocess_name": "LogAndSign",
+                "preprocess_options": {
+                    "k": 5
+                },
+                "scale": 0.01,
+            },
+        }
+    }
 
   def save(self, sess, path=None):
     """Save meta-optimizer."""
@@ -252,7 +247,7 @@ class MetaOptimizer(object):
         filename = None
         key = k
       else:
-        filename = os.path.join(path, "{}.l2l".format(k))
+        filename = os.path.join(path, f"{k}.l2l")
         key = filename
       net_vars = networks.save(net, sess, filename=filename)
       result[key] = net_vars

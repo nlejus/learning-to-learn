@@ -44,7 +44,7 @@ def print_stats(header, total_error, total_time, n):
 
 
 def get_net_path(name, path):
-  return None if path is None else os.path.join(path, name + ".l2l")
+  return None if path is None else os.path.join(path, f"{name}.l2l")
 
 
 def get_default_net_config(name, path):
@@ -115,14 +115,14 @@ def get_config(problem_name, path=None):
         "conv": get_default_net_config("conv", path),
         "fc": get_default_net_config("fc", path)
     }
-    conv_vars = ["conv_net_2d/conv_2d_{}/w".format(i) for i in xrange(3)]
-    fc_vars = ["conv_net_2d/conv_2d_{}/b".format(i) for i in xrange(3)]
-    fc_vars += ["conv_net_2d/batch_norm_{}/beta".format(i) for i in xrange(3)]
-    fc_vars += ["mlp/linear_{}/w".format(i) for i in xrange(2)]
-    fc_vars += ["mlp/linear_{}/b".format(i) for i in xrange(2)]
+    conv_vars = [f"conv_net_2d/conv_2d_{i}/w" for i in xrange(3)]
+    fc_vars = [f"conv_net_2d/conv_2d_{i}/b" for i in xrange(3)]
+    fc_vars += [f"conv_net_2d/batch_norm_{i}/beta" for i in xrange(3)]
+    fc_vars += [f"mlp/linear_{i}/w" for i in xrange(2)]
+    fc_vars += [f"mlp/linear_{i}/b" for i in xrange(2)]
     fc_vars += ["mlp/batch_norm/beta"]
     net_assignments = [("conv", conv_vars), ("fc", fc_vars)]
   else:
-    raise ValueError("{} is not a valid problem".format(problem_name))
+    raise ValueError(f"{problem_name} is not a valid problem")
 
   return problem, net_config, net_assignments

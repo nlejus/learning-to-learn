@@ -88,7 +88,7 @@ def _convert_to_initializer(initializer):
   """
 
   if isinstance(initializer, str):
-    return getattr(tf, initializer + "_initializer")(dtype=tf.float32)
+    return getattr(tf, f"{initializer}_initializer")(dtype=tf.float32)
   elif isinstance(initializer, np.ndarray):
     return tf.constant_initializer(initializer)
   else:
@@ -185,7 +185,7 @@ class StandardDeepLSTM(Network):
     with tf.variable_scope(self._template.variable_scope):
       self._cores = []
       for i, size in enumerate(layers, start=1):
-        name = "lstm_{}".format(i)
+        name = f"lstm_{i}"
         init = _get_layer_initializers(initializer, name,
                                        ("w_gates", "b_gates"))
         self._cores.append(snt.LSTM(size, name=name, initializers=init))
